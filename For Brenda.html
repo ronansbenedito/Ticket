@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafio para um Vale-Date!</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background 0.5s ease;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+      transition: transform 0.3s ease;
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .question {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    input {
+      padding: 12px;
+      width: 100%;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #ff9a9e;
+    }
+    button {
+      padding: 12px 24px;
+      background-color: #ff6f61;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+      margin: 5px;
+    }
+    button:hover {
+      background-color: #ff8a65;
+    }
+    #feedback {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    .voucher {
+      display: none;
+      animation: fadeIn 1s ease-in-out;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .voucher-card {
+      background-color: #ffe0b2;
+      border: 2px dashed #ff8a65;
+      padding: 20px;
+      border-radius: 16px;
+      display: inline-block;
+      text-align: center;
+    }
+    .voucher-card h2 {
+      font-size: 24px;
+      color: #ff7043;
+      margin: 0;
+    }
+    .voucher-card p {
+      font-size: 18px;
+      color: #333;
+    }
+    .voucher-card .signature {
+      margin-top: 10px;
+      font-style: italic;
+      color: #ff8a65;
+    }
+    .voucher img {
+      width: 200px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+    .print-instruction {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
+    .initial {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="initialScreen">
+    <p class="question">Olá, senhorita Tika, vamos jogar?</p>
+    <button onclick="startQuiz('sim')">Sim</button>
+    <button onclick="startQuiz('com certeza')">Com certeza</button>
+  </div>
+  
+  <div class="container" id="quiz" style="display: none;">
+    <p class="question" id="question">Primeira pergunta: Onde foi nosso primeiro encontro?</p>
+    <input type="text" id="answer" placeholder="Digite sua resposta">
+    <button onclick="checkAnswer()">Responder</button>
+    <p id="feedback"></p>
+  </div>
+
+  <div class="voucher" id="voucher">
+    <div class="voucher-card">
+      <h2>Vale-Date ❤️</h2>
+      <p>Este vale te garante um encontro especial comigo!</p>
+      <p class="signature">Com carinho, Benedito</p>
+    </div>
+    <p class="print-instruction">Tire um print para salvar o vale! 📸</p>
+  </div>
+
+  <script>
+    const questions = [
+      { question: "Onde foi nosso primeiro encontro?", answer: ["academia", "Academia"] },
+      { question: "Em que mês começamos a ficar?", answer: ["julho", "Julho"] },
+      { question: "Qual foi o primeiro presente que te dei?", answer: ["berloque", "Berloque", "pingente", "Pingente"] }
+    ];
+
+    let currentQuestion = 0;
+
+    function startQuiz(answer) {
+      document.getElementById("initialScreen").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("answer").focus(); // Focar no input quando o quiz começar
+    }
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById("answer").value.toLowerCase().trim();
+      const feedback = document.getElementById("feedback");
+
+      if (currentQuestion === 1) {
+        // Pegadinha: Pergunta se ela tem certeza da resposta
+        if (!confirm("Você tem certeza da sua resposta, mocinha?")) {
+          return; // Se ela cancelar, não verifica a resposta
+        }
+      }
+
+      const correctAnswer = questions[currentQuestion].answer;
+
+      if (Array.isArray(correctAnswer)) {
+        // Comparar respostas possíveis
+        if (correctAnswer.some(ans => ans.toLowerCase() === userAnswer)) {
+          showCorrectAnswer(feedback);
+        } else {
+          showIncorrectAnswer(feedback);
+        }
+      } else if (userAnswer === correctAnswer.toLowerCase()) {
+        // Comparar respostas simples
+        showCorrectAnswer(feedback);
+      } else {
+        showIncorrectAnswer(feedback);
+      }
+    }
+
+    function showCorrectAnswer(feedback) {
+      feedback.textContent = "Resposta correta! 😊";
+      feedback.style.color = "green";
+
+      currentQuestion++;
+      if (currentQuestion < questions.length) {
+        setTimeout(() => {
+          document.getElementById("question").textContent = questions[currentQuestion].question;
+          document.getElementById("answer").value = "";
+          feedback.textContent = "";
+          document.body.style.background = generateRandomGradient();
+        }, 1000);
+      } else {
+        setTimeout(showVoucher, 1000);
+      }
+    }
+
+    function showIncorrectAnswer(feedback) {
+      feedback.textContent = "Tente novamente! 😅";
+      feedback.style.color = "red";
+    }
+
+    function showVoucher() {
+      document.getElementById("quiz").style.display = "none";
+      document.getElementById("voucher").style.display = "block";
+    }
+
+    function generateRandomGradient() {
+      const colors = [
+        '#ff9a9e', '#fecfef', '#a18cd1', '#fbc2eb', '#fad0c4', '#ffd1ff', '#ff6f61', '#ff9966'
+      ];
+      const color1 = colors[Math.floor(Math.random() * colors.length)];
+      const color2 = colors[Math.floor(Math.random() * colors.length)];
+      return `linear-gradient(135deg, ${color1} 0%, ${color2} 100%)`;
+    }
+
+    // Adiciona um evento de teclado para o input
+    document.getElementById("answer").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // Evita o comportamento padrão do Enter (envio de formulário)
+        checkAnswer(); // Chama a função de verificação da resposta
+      }
+    });
+
+    // Adiciona um evento de clique para os botões, se necessário
+    document.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", function() {
+        this.blur(); // Remove o foco do botão após o clique
+      });
+    });
+  </script>
+</body>
+</html>
